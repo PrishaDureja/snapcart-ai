@@ -1,19 +1,25 @@
-# Python cache
+# Python
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
 
-# Mac files
+# Virtual environments
+.venv/
+venv/
+
+# Mac
 .DS_Store
 
-# Virtual environment
-.venv/
-
-# Uploaded images
+# Uploads
 uploads/
 data/uploads/
 
-# Model files (large)
-*.pkl
+# Model files (optional but recommended)
+models/*.pkl
 
-# VS Code settings (optional)
+# Dataset
+data/dataset.csv
+
+# VS Code
 .vscode/
