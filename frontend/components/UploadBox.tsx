@@ -37,20 +37,25 @@ export default function UploadBox() {
   return (
     <motion.div
       whileHover={{ scale: 1.02 }}
-      className="border border-gray-700 rounded-2xl p-8 text-center bg-[#1A1A1A]"
+      className="border border-gray-700 rounded-2xl p-8 bg-[#1A1A1A] flex flex-col items-center gap-4"
     >
+      
+      {/* File Input */}
       <input
         type="file"
-        className="mb-4 text-sm"
+        className="text-sm text-gray-400"
         onChange={(e) => setFile(e.target.files?.[0] || null)}
       />
 
+      {/* Button BELOW */}
       <button
         onClick={handleUpload}
-        className="bg-purple-600 px-6 py-3 rounded-xl hover:bg-purple-500 transition"
+        disabled={loading}
+        className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-purple-500 hover:opacity-90 transition font-medium"
       >
         {loading ? "Analyzing..." : "Analyze Product"}
       </button>
+
     </motion.div>
   );
 }
