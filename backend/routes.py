@@ -1,38 +1,35 @@
-from fastapi import APIRouter, UploadFile, File
-import shutil
-import os
-
-from backend.ocr import extract_text
-from ml.features import extract_features
-from backend.model import predict_fraud
+from fastapi import APIRouter, UploadFile, File, HTTPException
+from backend.gemini import analyze_product_image
 
 router = APIRouter()
-
-UPLOAD_FOLDER = "data/uploads"
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
 @router.post("/analyze")
 async def analyze_image(file: UploadFile = File(...)):
+    """
+    Accept a product screenshot, send it to Gemini Vision,
+    and return a structured deal analysis.
+    """
+    # Validate file type
+    allowed_types = {"image/png", "image/jpeg", "image/jpg", "image/webp", "image/gif"}
+    mime_type = file.content_type or "image/png"
 
-    file_path = os.path.join(UPLOAD_FOLDER, file.filename)
+    if mime_type not in allowed_types:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid file type: {mime_type}. Please upload PNG, JPG, or WEBP."
+        )
 
-    # Save uploaded file
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+    # Read image bytes (no disk write needed — Gemini takes raw bytes)
+    image_bytes = await file.read()
 
-    # OCR STEP
-    text_list = extract_text(file_path)
+    if len(image_bytes) == 0:
+        raise HTTPException(status_code=400, detail="Uploaded file is empty.")
 
-    # FEATURE EXTRACTION
-    features = extract_features(text_list)
+    if len(image_bytes) > 10 * 1024 * 1024:  # 10 MB limit
+        raise HTTPException(status_code=400, detail="File too large. Max 10MB.")
 
-    # ML FRAUD PREDICTION
-    fraud_probability, fraud_label = predict_fraud(features)
+    # Analyze with Gemini Vision
+    result = analyze_product_image(image_bytes, mime_type)
 
-    return {
-    "ocr_text": text_list,
-    "features": features,
-    "fraud_probability": fraud_probability,
-    "fraud_label": fraud_label
-}
+    return result

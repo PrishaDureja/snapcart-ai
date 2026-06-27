@@ -23,3 +23,6 @@ data/dataset.csv
 
 # VS Code
 .vscode/
+
+# Environment variables (NEVER commit this)
+.env
